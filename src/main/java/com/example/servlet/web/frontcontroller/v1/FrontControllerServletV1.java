@@ -47,6 +47,7 @@ public class FrontControllerServletV1 extends HttpServlet {
             return;
         }
 
-        controller.process(request, response);
+        MyView view = controller.process(request, response);
+        view.render(request, response);
     }
 }

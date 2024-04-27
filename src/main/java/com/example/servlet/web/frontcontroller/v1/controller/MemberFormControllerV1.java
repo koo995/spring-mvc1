@@ -1,22 +1,17 @@
 package com.example.servlet.web.frontcontroller.v1.controller;
 
 import com.example.servlet.web.frontcontroller.v1.ControllerV1;
-import jakarta.servlet.RequestDispatcher;
-import jakarta.servlet.ServletException;
+import com.example.servlet.web.frontcontroller.v1.MyView;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import java.io.IOException;
 
 public class MemberFormControllerV1 implements ControllerV1 {
 
     /**
-     * view 도 똑같이 쓸것이다.
+     *
      */
     @Override
-    public void process(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String viewPath = "/WEB-INF/views/new-form.jsp";
-        RequestDispatcher dispatcher = request.getRequestDispatcher(viewPath);
-        dispatcher.forward(request, response);
+    public MyView process(HttpServletRequest request, HttpServletResponse response) {
+        return new MyView("/WEB-INF/views/new-form.jsp");
     }
 }
