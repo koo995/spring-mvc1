@@ -15,20 +15,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 
+/**
+ * 프론트 컨트롤러가 되게 하는 것이 많아졌다.
+ * 그러나 실제 구현한 controller 는 되게 편해졌다.
+ */
 @Slf4j
 @WebServlet(name = "frontControllerServletV1", urlPatterns = "/front-controller/v1/*")
 public class FrontControllerServletV1 extends HttpServlet {
 
-    /**
-     * 매핑정보이다. 어떤 url 이 호출되면 controllerV1(적절하게 구현된 구현체)을 꺼내서 호출해 라는 뜻이다.
-     * 다형성을 활용하는 것을 잘 보자!
-     */
-    private Map<String, ControllerV1> controllerMap = new HashMap<>();
+    private final Map<String, ControllerV1> controllerMap = new HashMap<>();
 
-    /**
-     * 서블릿이 생성될때 매핑정보를 담아둘 생각이다.
-     * 바로 꺼내서 쓸 수 있다.
-     */
     public FrontControllerServletV1() {
         controllerMap.put("/front-controller/v1/members/new-form", new MemberFormControllerV1());
         controllerMap.put("/front-controller/v1/members/save", new MemberSaveControllerV1());
@@ -47,7 +43,23 @@ public class FrontControllerServletV1 extends HttpServlet {
             return;
         }
 
-        MyView view = controller.process(request, response);
-        view.render(request, response);
+        // paramMap 을 넘겨주는 것을 볼 수 있다.
+        Map<String, String> paramMap = createParamMap(request);
+
+        ModelView mv = controller.process(paramMap); // mv 는 논리이름만 가지고 있다.
+        String viewName = mv.getViewName();
+        MyView view = viewResolver(viewName);
+        view.render(mv.getModel(), request, response);
+    }
+
+    private static MyView viewResolver(String viewName) {
+        return new MyView("/WEB-INF/views/" + viewName + ".jsp");
+    }
+
+    private static Map<String, String> createParamMap(HttpServletRequest request) {
+        Map<String, String> paramMap = new HashMap<>();
+        request.getParameterNames().asIterator()
+                .forEachRemaining(paramName -> paramMap.put(paramName, request.getParameter(paramName)));
+        return paramMap;
     }
 }
