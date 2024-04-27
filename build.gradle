@@ -30,7 +30,9 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     // jsp 추가 시작
     implementation 'org.apache.tomcat.embed:tomcat-embed-jasper'
-    implementation 'javax.servlet:jstl'
+    implementation 'jakarta.servlet:jakarta.servlet-api' // spring boot 3.0
+    implementation 'jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api' // spring boot 3.0
+    implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl' // spring boot 3.0
     // jsp 추가 끝
 }
 
