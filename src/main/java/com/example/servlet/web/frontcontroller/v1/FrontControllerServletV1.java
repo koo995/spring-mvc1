@@ -45,11 +45,15 @@ public class FrontControllerServletV1 extends HttpServlet {
 
         // paramMap 을 넘겨주는 것을 볼 수 있다.
         Map<String, String> paramMap = createParamMap(request);
+        Map<String, Object> model = new HashMap<>();
 
-        ModelView mv = controller.process(paramMap); // mv 는 논리이름만 가지고 있다.
-        String viewName = mv.getViewName();
+        /**
+         * model 을 컨트롤러로 넘겨버리면 컨트롤러 안에서 막 돌아가면서 모델의 값을 담으면 여기 있는 model 에 담길테니 밑에서 쓰면 된다.
+         * 이야... 이게 자바 call by value 의 특징인가?
+         */
+        String viewName = controller.process(paramMap, model);
         MyView view = viewResolver(viewName);
-        view.render(mv.getModel(), request, response);
+        view.render(model, request, response);
     }
 
     private static MyView viewResolver(String viewName) {
