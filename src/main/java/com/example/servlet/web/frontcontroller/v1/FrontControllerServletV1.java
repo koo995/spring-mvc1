@@ -1,6 +1,10 @@
 package com.example.servlet.web.frontcontroller.v1;
 
+import com.example.servlet.web.frontcontroller.v1.adapter.ControllerV1HandlerAdapter;
 import com.example.servlet.web.frontcontroller.v1.adapter.ControllerV3HandlerAdapter;
+import com.example.servlet.web.frontcontroller.v1.controller.MemberFormControllerV1;
+import com.example.servlet.web.frontcontroller.v1.controller.MemberListControllerV1;
+import com.example.servlet.web.frontcontroller.v1.controller.MemberSaveControllerV1;
 import com.example.servlet.web.frontcontroller.v3.controller.MemberFormControllerV3;
 import com.example.servlet.web.frontcontroller.v3.controller.MemberListControllerV3;
 import com.example.servlet.web.frontcontroller.v3.controller.MemberSaveControllerV3;
@@ -76,10 +80,15 @@ public class FrontControllerServletV1 extends HttpServlet {
         handlerMappingMap.put("/front-controller/v5/v3/members/new-form", new MemberFormControllerV3());
         handlerMappingMap.put("/front-controller/v5/v3/members/save", new MemberSaveControllerV3());
         handlerMappingMap.put("/front-controller/v5/v3/members", new MemberListControllerV3());
+        // v1 추가
+        handlerMappingMap.put("/front-controller/v5/v4/members/new-form", new MemberFormControllerV1());
+        handlerMappingMap.put("/front-controller/v5/v4/members/save", new MemberSaveControllerV1());
+        handlerMappingMap.put("/front-controller/v5/v4/members", new MemberListControllerV1());
     }
 
     private void initHandlerAdapters() {
         handlerAdapters.add(new ControllerV3HandlerAdapter());
+        handlerAdapters.add(new ControllerV1HandlerAdapter());
     }
 
     private static MyView viewResolver(String viewName) {
