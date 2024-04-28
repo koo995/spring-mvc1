@@ -1,8 +1,9 @@
 package com.example.servlet.web.frontcontroller.v1;
 
-import com.example.servlet.web.frontcontroller.v1.controller.MemberFormControllerV1;
-import com.example.servlet.web.frontcontroller.v1.controller.MemberListControllerV1;
-import com.example.servlet.web.frontcontroller.v1.controller.MemberSaveControllerV1;
+import com.example.servlet.web.frontcontroller.v1.adapter.ControllerV3HandlerAdapter;
+import com.example.servlet.web.frontcontroller.v3.controller.MemberFormControllerV3;
+import com.example.servlet.web.frontcontroller.v3.controller.MemberListControllerV3;
+import com.example.servlet.web.frontcontroller.v3.controller.MemberSaveControllerV3;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -11,7 +12,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -20,50 +23,66 @@ import java.util.Map;
  * 그러나 실제 구현한 controller 는 되게 편해졌다.
  */
 @Slf4j
-@WebServlet(name = "frontControllerServletV1", urlPatterns = "/front-controller/v1/*")
+@WebServlet(name = "frontControllerServletV1", urlPatterns = "/front-controller/v5/*")
 public class FrontControllerServletV1 extends HttpServlet {
 
-    private final Map<String, ControllerV1> controllerMap = new HashMap<>();
+    /**
+     * 기존이랑 차이는 controllerMap 에서는 컨트롤러가 정해져 있는데
+     * handlerMappingMap 에서는 아무거나 다 들어갈 수 있다.
+     */
+    private final Map<String, Object> handlerMappingMap = new HashMap<>();
+    private final List<MyHandlerAdapter> handlerAdapters = new ArrayList<>();
 
     public FrontControllerServletV1() {
-        controllerMap.put("/front-controller/v1/members/new-form", new MemberFormControllerV1());
-        controllerMap.put("/front-controller/v1/members/save", new MemberSaveControllerV1());
-        controllerMap.put("/front-controller/v1/members", new MemberListControllerV1());
+        initHandlerMappingMap();
+        initHandlerAdapters();
     }
 
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         log.info("FrontControllerServletV1.service");
 
-        String requestURI = request.getRequestURI();
-
-        ControllerV1 controller = controllerMap.get(requestURI);
-        if (controller == null) {
+        Object handler = getHandler(request);
+        if (handler == null) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
 
-        // paramMap 을 넘겨주는 것을 볼 수 있다.
-        Map<String, String> paramMap = createParamMap(request);
-        Map<String, Object> model = new HashMap<>();
+        MyHandlerAdapter adapter = getHandlerAdapter(handler);
 
+        ModelView mv = adapter.handle(request, response, handler);
+        MyView view = viewResolver(mv.getViewName());
+        view.render(mv.getModel(), request, response);
+    }
+
+    private MyHandlerAdapter getHandlerAdapter(Object handler) {
         /**
-         * model 을 컨트롤러로 넘겨버리면 컨트롤러 안에서 막 돌아가면서 모델의 값을 담으면 여기 있는 model 에 담길테니 밑에서 쓰면 된다.
-         * 이야... 이게 자바 call by value 의 특징인가?
+         * 핸들러를 처리할 수 있는 어댑터를 반복문을 통해서 찾는다.
          */
-        String viewName = controller.process(paramMap, model);
-        MyView view = viewResolver(viewName);
-        view.render(model, request, response);
+        for (MyHandlerAdapter adapter : handlerAdapters) {
+            if (adapter.support(handler)) {
+                return adapter;
+            }
+        }
+        throw new IllegalArgumentException("handler adapter 을 찾을 수 없습니다. handler=" + handler);
+    }
+
+    private Object getHandler(HttpServletRequest request) {
+        String requestURI = request.getRequestURI();
+        return handlerMappingMap.get(requestURI);
+    }
+
+    private void initHandlerMappingMap() {
+        handlerMappingMap.put("/front-controller/v5/v3/members/new-form", new MemberFormControllerV3());
+        handlerMappingMap.put("/front-controller/v5/v3/members/save", new MemberSaveControllerV3());
+        handlerMappingMap.put("/front-controller/v5/v3/members", new MemberListControllerV3());
+    }
+
+    private void initHandlerAdapters() {
+        handlerAdapters.add(new ControllerV3HandlerAdapter());
     }
 
     private static MyView viewResolver(String viewName) {
         return new MyView("/WEB-INF/views/" + viewName + ".jsp");
-    }
-
-    private static Map<String, String> createParamMap(HttpServletRequest request) {
-        Map<String, String> paramMap = new HashMap<>();
-        request.getParameterNames().asIterator()
-                .forEachRemaining(paramName -> paramMap.put(paramName, request.getParameter(paramName)));
-        return paramMap;
     }
 }
