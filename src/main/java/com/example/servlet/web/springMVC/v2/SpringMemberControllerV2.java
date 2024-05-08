@@ -2,11 +2,10 @@ package com.example.servlet.web.springMVC.v2;
 
 import com.example.servlet.domain.member.Member;
 import com.example.servlet.domain.member.MemberRepository;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -16,33 +15,39 @@ public class SpringMemberControllerV2 {
 
     private final MemberRepository memberRepository = MemberRepository.getInstance();
 
+    /**
+     * 애너테이션 기반의 컨트롤러는 인터페이스가 아니라 딱 고정되어있지 않다. 매우 유연하다.
+     * ModelAndView 을 반환해도 되고 String 으로 반환해도 된다.
+     */
     @RequestMapping("/new-form")
-    public ModelAndView newForm() {
-        return new ModelAndView("new-form"); // 여기서도 앞에서 설정했던 뷰리졸버가 적용된다.
+    public String newForm() {
+        return "new-form";
     }
 
     /**
      * 여기서 오류가 나타난다.
      */
     @RequestMapping()
-    public ModelAndView list() {
+    public String list(Model model) {
         List<Member> members = memberRepository.findAll();
 
-        ModelAndView mv = new ModelAndView("members");
-        mv.addObject("members", members);
-        return mv;
+        model.addAttribute("members", members);
+        return "members";
     }
 
+    /**
+     * 파라미터를 직접 받을 수 있다.
+     * Model 도 받을 수 있다.
+     */
     @RequestMapping("/save")
-    public ModelAndView save(HttpServletRequest request, HttpServletResponse response) {
-        String username = request.getParameter("username");
-        int age = Integer.parseInt(request.getParameter("age"));
+    public String save(@RequestParam("username") String username,
+                             @RequestParam("age") int age,
+                             Model model) {
 
         Member member = new Member(username, age);
         memberRepository.save(member);
 
-        ModelAndView mv = new ModelAndView("save-result");
-        mv.addObject("member", member);
-        return mv;
+        model.addAttribute("member", member);
+        return "save-result";
     }
 }
