@@ -36,6 +36,11 @@ public class OldController implements Controller {
     @Override
     public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
         System.out.println("OldController.handleRequest");
-        return null;
+        /**
+         * 물리적인 경로를 적어줘도 동작은 한다
+         * 그렇지만 논리적 이름으로 호출하기 위함
+         * InternalResourceViewResolver 가 처리한다.(스프링부트가 설정으로 등록함)
+         */
+        return new ModelAndView("new-form");
     }
 }
