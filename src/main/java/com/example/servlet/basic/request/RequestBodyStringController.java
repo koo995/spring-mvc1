@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,7 +51,7 @@ public class RequestBodyStringController {
 
     /**
      * 스트림 바꾸고 이런게 너무 싫다?
-     * 메시지 컨버터를 이용한 HttpEntity 을 제공한다.
+     * "메시지 컨버터"를 이용한 HttpEntity 을 제공한다.
      * HttpEntity 는 http 메시지를 스펙화 한 것으로 생각하면 된다?
      * header 와 body 정보를 직접 조회할 수 있다. 응답에도 적용가능하고 view 도 조회안한다.
      * 참고: http 요청 파라미터와는 전혀 상관없다!!
@@ -62,5 +64,16 @@ public class RequestBodyStringController {
         log.info("messageBody={}", messageBody);
 
         return new ResponseEntity<>("ok", HttpStatus.CREATED); // 첫번째 파라미터로 메시지 바디를 받을 수 있다.
+    }
+
+    /**
+     * RequestEntity ResponseEntity 이런거 다 써야해...?
+     * 애너테이션이 제공된다. 이걸 정말 많이 쓴다.
+     */
+    @ResponseBody
+    @PostMapping("/request-body-string-v4")
+    public String requestBodyStringV4(@RequestBody String messageBody) {
+        log.info("messageBody={}", messageBody);
+        return "ok";
     }
 }
