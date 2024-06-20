@@ -4,7 +4,9 @@ import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.RequestEntity;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -51,13 +53,14 @@ public class RequestBodyStringController {
      * HttpEntity 는 http 메시지를 스펙화 한 것으로 생각하면 된다?
      * header 와 body 정보를 직접 조회할 수 있다. 응답에도 적용가능하고 view 도 조회안한다.
      * 참고: http 요청 파라미터와는 전혀 상관없다!!
+     * HttpEntity 을 상속받은 녀석들로 몇가지 기능을 더 제공한다.
      */
     @PostMapping("/request-body-string-v3")
-    public HttpEntity<String> requestBodyStringV3(HttpEntity<String> httpEntity) throws IOException {
+    public ResponseEntity<String> requestBodyStringV3(RequestEntity<String> httpEntity) throws IOException {
 
         String messageBody = httpEntity.getBody();
         log.info("messageBody={}", messageBody);
 
-        return new HttpEntity<>("ok"); // 첫번째 파라미터로 메시지 바디를 받을 수 있다.
+        return new ResponseEntity<>("ok", HttpStatus.CREATED); // 첫번째 파라미터로 메시지 바디를 받을 수 있다.
     }
 }
